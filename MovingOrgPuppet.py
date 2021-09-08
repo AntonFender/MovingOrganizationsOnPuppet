@@ -4,10 +4,7 @@
 import requests
 import urllib3
 from pprint import pprint
-import uuid
-from bs4 import BeautifulSoup
-import re
-import json
+
 
 # Инициализация переменных
 show_status = "https://192.168.0.11/api/status"
@@ -57,6 +54,33 @@ def hostgroupsGet(ss):
         print("Не получили ID окружений. Выход из программы")
         exit(0)
 
+def updateHost(ss, envgroup, host):
+    """Выполняем обновление хоста"""
+    update_host = ''
+    id_production, id_egaisoff = environmentsGet(ss)
+    id_work_group, id_work_group_no_egais = hostgroupsGet(ss)
+    list_egaisoff = {'host[hostgroup_id]': id_work_group_no_egais, 'host[environment_id]': id_egaisoff}
+    list_work_group = {'host[hostgroup_id]': id_work_group, 'host[environment_id]': id_production}
+
+    list_host = ss.get(api_hosts + '/' + host).json()
+    id_host = str(list_host['id'])
+
+    if envgroup == 'work-group':
+        update_host = ss.put(api_hosts + '/' + id_host, params=list_work_group, headers=HEADERS)
+    elif envgroup == 'egaisoff':
+        update_host = ss.put(api_hosts + '/' + id_host, params=list_egaisoff, headers=HEADERS)
+    else:
+        print('Неверно указано куда перемещаем host({})'.format(envgroup))
+    if update_host:
+        if update_host.status_code == 200:
+            print('Узел успешно перемещен в {}({})'.format(envgroup, update_host.status_code))
+        else:
+            print('Узел не перемещен в {}. Не известная ошибка({})...'.format(envgroup, update_host.status_code))
+    else:
+        print('Узел не перемещен в {}. Не выполнился update_host'.format(envgroup))
+
+
+
 ss = authForeman()
 if ss.get(show_status).json()['status'] == 200:
     print('Доступ к API puppet получен')
@@ -64,15 +88,5 @@ else:
     print('Нет доступа к API. Выход')
     exit(0)
 
-id_production, id_egaisoff = environmentsGet(ss)
-id_work_group, id_work_group_no_egais = hostgroupsGet(ss)
-list_egaisoff = {'host[hostgroup_id]': id_work_group_no_egais, 'host[environment_id]': id_egaisoff}
-list_work_group = {'host[hostgroup_id]': id_work_group, 'host[environment_id]': id_production}
-
-list_host = ss.get(api_hosts + '/cash-20000679030-200006790301').json()
-id_host = str(list_host['id'])
-
-
-update_host = ss.put(api_hosts + '/' + id_host, params=list_egaisoff, headers=HEADERS)
-print(update_host.status_code)
-pprint(update_host.json())
+# Передаем методу: 1) Сессию 2) В какую группу перемещаем 3) имя узла
+resault = updateHost(ss, 'egaisoff', 'cash-20000679030-200006790301')
