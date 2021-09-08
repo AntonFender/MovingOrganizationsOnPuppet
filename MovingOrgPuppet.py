@@ -68,12 +68,12 @@ def createInfoHost(list_host, csrf_token):
         resaul_list_host[key_list] = val
 
     # Добавляем дополнительные значения к словарю resaul_list_host
-    resaul_list_host['host[hostgroup_id]'] = 1
-    resaul_list_host['host[environment_id]'] = 1
+    resaul_list_host['host[hostgroup_id]'] = 4
+    resaul_list_host['host[environment_id]'] = 2
     resaul_list_host['host[puppetclass_ids][]'] = ''
     resaul_list_host['host[progress_report_id]'] = str(uuid.uuid1())
     resaul_list_host['authenticity_token'] = csrf_token
-    resaul_list_host['_method: patch'] = 'patch'
+    resaul_list_host['_method'] = 'patch'
     return resaul_list_host
 
 def createInterfaceList(list_host):
@@ -136,33 +136,17 @@ else:
 list_host = ss.get(api_hosts + '/cash-20000679030-200006790301').json()
 id_host = str(list_host['id'])
 
-list_host['environment_id'] = 1
-list_host['hostgroup_id'] = 1
-list_host['environment_name'] = 'production'
-list_host['hostgroup_name'] = 'work-group'
-list_host['hostgroup_title'] = 'work-group'
-pprint(list_host)
+list_interface = createInterfaceList(list_host)
+list_host_data = createInfoHost(list_host, csrf_token)
+inner_list = {**list_host_data, **list_interface}
+# HEADERS['X-CSRF-Token'] = csrf_token
 
 
-update_host = ss.put(api_hosts + '/' + id_host, params=list_host, headers=HEADERS)
+
+update_host = ss.put(api_hosts + '/' + id_host, params=inner_list, headers=HEADERS)
 print(update_host.status_code)
 print(update_host.text)
 
-
-
-# list_interface = createInterfaceList(list_host)
-# list_host_data = createInfoHost(list_host, csrf_token)
-# inner_list = {**list_host_data, **list_interface}
-# HEADERS['X-CSRF-Token'] = csrf_token
-# r = json.dumps(inner_list)
-# l = json.loads(r)
-
-# update_host = ss.put(api_hosts + '/' + id_host, data=l, headers=HEADERS)
-# print(update_host.status_code)
-# print(update_host.headers)
-# print(update_host.text)
-# print(update_host.request.headers)
-# print(update_host.request.body)
 
 
 
