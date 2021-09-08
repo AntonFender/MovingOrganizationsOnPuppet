@@ -1,0 +1,17 @@
+'Accept': '*/*',
+'Accept-Encoding': 'gzip, deflate, br',
+'Accept-Language': 'ru,en;q=0.9',
+'Connection': 'keep-alive',
+'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+'Host': '192.168.0.11',
+'Origin': 'https://192.168.0.11',
+'Referer': 'https://192.168.0.11/hosts/cash-20000679030-200006790301/edit',
+'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.131 YaBrowser/21.8.1.468 Yowser/2.5 Safari/537.36'
+
+
+'sec-ch-ua': '"Chromium";v="92", " Not A;Brand";v="99", "Yandex";v="21"',
+'sec-ch-ua-mobile': '?0',
+'Sec-Fetch-Dest': 'empty',
+'Sec-Fetch-Mode': 'cors',
+'Sec-Fetch-Site': 'same-origin',
+'X-Requested-With': 'XMLHttpRequest',
