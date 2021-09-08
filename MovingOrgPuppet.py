@@ -79,8 +79,21 @@ def updateHost(ss, envgroup, host):
     else:
         print('Узел не перемещен в {}. Не выполнился update_host'.format(envgroup))
 
+# Общение с пользователем
+while True:
+    try:
+        dic = {1: 'egaisoff', 2: 'work-group'}
+        move_host = int(input("Куда будем перемещать узлы foreman\n1)egaisoff\n2)work-group\nВведите число: "))
+        if move_host in dic:
+            print('Будем перемещать в {}'.format(str(dic[move_host])))
+            break
+        else:
+            print('Попробуйте снова. У вас получиться!')
+    except:
+        print('Видимо вы ввели не число. Нужно снова идти в школу!')
 
 
+# Основной код программы
 ss = authForeman()
 if ss.get(show_status).json()['status'] == 200:
     print('Доступ к API puppet получен')
@@ -89,4 +102,4 @@ else:
     exit(0)
 
 # Передаем методу: 1) Сессию 2) В какую группу перемещаем 3) имя узла
-resault = updateHost(ss, 'egaisoff', 'cash-20000679030-200006790301')
+resault = updateHost(ss, dic[move_host], 'cash-20000679030-200006790301')
