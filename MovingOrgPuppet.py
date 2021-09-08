@@ -1,21 +1,14 @@
 # Скрипт для перемещения организация на puppet
 
 
-import os
 import requests
-from bs4 import BeautifulSoup
-import certifi
 import urllib3
-
+from pprint import pprint
 
 # Инициализация переменных
-host = "https://192.168.0.11"
-show_available_api_links = "https://192.168.0.11/api"
 show_status = "https://192.168.0.11/api/status"
-list_hosts = "https://192.168.0.11/api/hosts"
-update_host = "https://192.168.0.11/api/hosts/:id"
-cert1 = r"certs\confsrv2.puppet.ru.pem"
-cert2 = r"public_keys\confsrv2.puppet.ru.pem"
+api_hosts = "https://192.168.0.11/api/hosts"
+
 
 
 def authForeman():
@@ -27,5 +20,11 @@ def authForeman():
     return ss
 
 ss = authForeman()
-res1 = ss.get(show_status)
-print(res1.text)
+if ss.get(show_status).json()['status'] == 200:
+    print('Доступ к API puppet получен')
+else:
+    print('Нет доступа к API. Выход')
+    exit(0)
+
+list_host = ss.get(api_hosts + '/cash-20000679030-200006790301').json()
+pprint(list_host)
