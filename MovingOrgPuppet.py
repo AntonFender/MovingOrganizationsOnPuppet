@@ -74,6 +74,7 @@ def updateHost(ss, envgroup, host):
     if update_host:
         if update_host.status_code == 200:
             print('Узел успешно перемещен в {}({})'.format(envgroup, update_host.status_code))
+            pprint(update_host.json())
         else:
             print('Узел не перемещен в {}. Не известная ошибка({})...'.format(envgroup, update_host.status_code))
     else:
@@ -102,4 +103,8 @@ else:
     exit(0)
 
 # Передаем методу: 1) Сессию 2) В какую группу перемещаем 3) имя узла
-resault = updateHost(ss, dic[move_host], 'cash-20000679030-200006790301')
+resault = updateHost(ss, dic[move_host], 'cash-20000614697-200006146971')
+
+
+# В такой вид нужно привести то, что я вытену с монгоДб
+dictin = {'Мармир': [1, 2, 3, 4], 'Анабас': [5, 6, 7, 8, 9, 10]}
