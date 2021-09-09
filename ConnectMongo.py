@@ -7,7 +7,7 @@ from pprint import pprint
 from sshtunnel import SSHTunnelForwarder
 import pymongo
 from bson.dbref import DBRef
-
+import configparser
 
 class pymongoClass():
     def ssh_pyMongo(self):
@@ -64,10 +64,12 @@ class pymongoClass():
         except:
             pass
         varName.close()
-        return glossary
+        # Удаляем все ФСРАР ИД, которые находятся в эмуляторе(зверинец)
+        list_del_emul = self.getFsrarUmulator(glossary)
+        return list_del_emul
 
     def getGroupAndOrg(self, conn, bdMongo, collection, id, name):
-        """Получаем ИД группы и организацию"""
+        """Получаем ИД организации и имя организацию"""
         glossary = dict()       # Создаем пустой словарь
         db = conn[bdMongo]      # Выбираем базу данных в МОНГО
         coll = db[collection]   # Выбираем коллекцию в МОНГО
@@ -100,3 +102,25 @@ class pymongoClass():
         # for i in resault:
         #     print("{} - {}".format(i, str(len(resault[i]))))
         return resault
+
+    def getFsrarUmulator(self, glossary):
+        """Получаем фсрар ид из эмулятора и убираем эти фсрар из списка полученого из монгоДБ"""
+        list_emul_fsrar = []
+        path = r'\\172.16.253.7\SysWOW64\pkcs11Emulators.ini'
+        config = configparser.ConfigParser()
+        config.read(path)
+        for i in config:
+            try:
+                FSRAR = config.get(i, 'Name')
+                list_emul_fsrar.append(FSRAR)
+            except:
+                pass
+        for i in list_emul_fsrar:
+            try:
+                del glossary[i]
+            except:
+                pass
+        return glossary
+
+# qwe = pymongoClass()
+# q = qwe.ssh_pyMongo()

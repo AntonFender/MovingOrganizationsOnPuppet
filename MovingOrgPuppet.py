@@ -106,17 +106,14 @@ if os.path.exists('log.txt'):
     os.remove('log.txt')
 
 # Просим пользователя выбрать куда перемещаем хосты в Foreman
-while True:
-    try:
-        dic = {1: 'egaisoff', 2: 'work-group'}
-        move_host = int(input("Куда будем перемещать узлы foreman\n1)egaisoff\n2)work-group\nВведите число: "))
-        if move_host in dic:
-            print('Будем перемещать в {}'.format(str(dic[move_host])))
-            break
-        else:
-            print('Попробуйте снова. У вас получиться!')
-    except:
-        print('Видимо вы ввели не число. Нужно снова идти в школу!')
+
+dic = {1: 'egaisoff', 2: 'work-group'}
+move_host = int(input("Куда будем перемещать узлы foreman\n1)egaisoff\n2)work-group\nВведите число: "))
+if move_host in dic:
+    print('Будем перемещать в {}'.format(str(dic[move_host])))
+else:
+    writeLog("Че сложно норм число ввести")
+    exit(0)
 
 # Получаем данные с МонгоДб и общаемся с пользователем
 text = ''
