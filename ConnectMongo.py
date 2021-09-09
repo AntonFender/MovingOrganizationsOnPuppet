@@ -9,11 +9,7 @@ import pymongo
 from bson.dbref import DBRef
 
 
-Mass = []
-
 class pymongoClass():
-
-    ##Подключение к MOMGO
     def ssh_pyMongo(self):
         mongo_port = 27017
         mongo_host = '127.0.0.1'
@@ -23,8 +19,6 @@ class pymongoClass():
         ssh_user = 'root'
         ssh_port = 22
         ssh_password = 'Ma4u-Pik4u'
-        i = 0
-
 
         try:
             print("Пытаюсь установить соединение")
@@ -40,10 +34,11 @@ class pymongoClass():
                 except:
                     print("Соединение не установлено!")
                 try:
-                    get_group_id_title = self.getGroupAndOrg(conn, 'artixcs', 'group', '_id', 'title')
-                    DbrefsIdAndIP = self.geGroupAndFsrar(conn, 'artixcs', 'shop', 'parent', '$id', 'displayCode')
-                    self.innerDict(get_group_id_title, DbrefsIdAndIP)
+                    get_orgid_name = self.getGroupAndOrg(conn, 'artixcs', 'organization', '_id', 'name')
+                    DbrefsIdAndIP = self.geGroupAndFsrar(conn, 'artixcs', 'shop', 'organizationExcise', '$id', 'displayCode')
+                    fsrar_and_org = self.innerDict(get_orgid_name, DbrefsIdAndIP)
                     conn.close()
+                    return fsrar_and_org
                 except:
                     conn.close()
                     print("Повторите обращение к МонгоДБ")
@@ -80,27 +75,31 @@ class pymongoClass():
 
         for men in varName:
             try:
-                for i in men:
-                    if (i in id):
-                        Mass.append([men[name], men[id]])
-                        glossary[men[id]] = men[name]
+                if men[name] != 'Тамада ООО':
+                    glossary[men[id]] = men[name]
             except:
                 pass
-        try:
-            del glossary['_group_32_3870b6e4']
-            del glossary['1']
-        except:
-            pass
         varName.close()
         return glossary
 
     def innerDict(self, get_group_id_title, DbrefsIdAndIP):
         """Объеденяем два словаря"""
+        glossary = {}
+        resault = {}
+        for i in get_group_id_title:
+            for j in DbrefsIdAndIP:
+                if i == DbrefsIdAndIP[j]:
+                    glossary[j] = get_group_id_title[i]
+        for fsrar in glossary:
+            org = glossary[fsrar]
+            if org in resault:
+                resault[org].append(fsrar)
+            else:
+                resault[org] = [fsrar]
+        # for i in resault:
+        #     print("{} - {}".format(i, str(len(resault[i]))))
+        return resault
 
 
 
-
-
-qwe = pymongoClass()
-qwe.ssh_pyMongo()
 

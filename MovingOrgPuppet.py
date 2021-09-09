@@ -4,7 +4,7 @@
 import requests
 import urllib3
 from pprint import pprint
-
+from ConnectMongo import pymongoClass
 
 # Инициализация переменных
 show_status = "https://192.168.0.11/api/status"
@@ -80,31 +80,41 @@ def updateHost(ss, envgroup, host):
     else:
         print('Узел не перемещен в {}. Не выполнился update_host'.format(envgroup))
 
-# Общение с пользователем
-while True:
-    try:
-        dic = {1: 'egaisoff', 2: 'work-group'}
-        move_host = int(input("Куда будем перемещать узлы foreman\n1)egaisoff\n2)work-group\nВведите число: "))
-        if move_host in dic:
-            print('Будем перемещать в {}'.format(str(dic[move_host])))
-            break
-        else:
-            print('Попробуйте снова. У вас получиться!')
-    except:
-        print('Видимо вы ввели не число. Нужно снова идти в школу!')
+def getDataMongo():
+    """Получаем данные с МонгоДб"""
+    app = pymongoClass()
+    while True:
+        try:
+            dict_org_host = app.ssh_pyMongo()
+            if dict_org_host:
+                return dict_org_host
+        except:
+            continue
+
+# # Общение с пользователем
+# while True:
+#     try:
+#         dic = {1: 'egaisoff', 2: 'work-group'}
+#         move_host = int(input("Куда будем перемещать узлы foreman\n1)egaisoff\n2)work-group\nВведите число: "))
+#         if move_host in dic:
+#             print('Будем перемещать в {}'.format(str(dic[move_host])))
+#             break
+#         else:
+#             print('Попробуйте снова. У вас получиться!')
+#     except:
+#         print('Видимо вы ввели не число. Нужно снова идти в школу!')
+#
+#
+# # Основной код программы
+# ss = authForeman()
+# if ss.get(show_status).json()['status'] == 200:
+#     print('Доступ к API puppet получен')
+# else:
+#     print('Нет доступа к API. Выход')
+#     exit(0)
+#
+# # Передаем методу: 1) Сессию 2) В какую группу перемещаем 3) имя узла
+# resault = updateHost(ss, dic[move_host], 'cash-20000614697-200006146971')
 
 
-# Основной код программы
-ss = authForeman()
-if ss.get(show_status).json()['status'] == 200:
-    print('Доступ к API puppet получен')
-else:
-    print('Нет доступа к API. Выход')
-    exit(0)
-
-# Передаем методу: 1) Сессию 2) В какую группу перемещаем 3) имя узла
-resault = updateHost(ss, dic[move_host], 'cash-20000614697-200006146971')
-
-
-# В такой вид нужно привести то, что я вытену с монгоДб
-dictin = {'Мармир': [1, 2, 3, 4], 'Анабас': [5, 6, 7, 8, 9, 10]}
+print(getDataMongo())
