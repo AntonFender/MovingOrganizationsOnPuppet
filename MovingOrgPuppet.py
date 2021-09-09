@@ -1,10 +1,12 @@
 # Скрипт для перемещения организация на puppet
 # api documentation https://apidocs.theforeman.org/foreman/2.5/apidoc/v2.html
+import os
 
 import requests
 import urllib3
 from pprint import pprint
 from ConnectMongo import pymongoClass
+from time import sleep
 
 # Инициализация переменных
 show_status = "https://192.168.0.11/api/status"
@@ -54,6 +56,12 @@ def hostgroupsGet(ss):
         print("Не получили ID окружений. Выход из программы")
         exit(0)
 
+def writeLog(data):
+    """Запись лог файла перемещения"""
+    with open("log.txt", 'a', encoding='utf8') as f:
+        f.write(str(data) + '\n')
+
+
 def updateHost(ss, envgroup, host):
     """Выполняем обновление хоста"""
     update_host = ''
@@ -64,6 +72,7 @@ def updateHost(ss, envgroup, host):
 
     list_host = ss.get(api_hosts + '/' + host).json()
     id_host = str(list_host['id'])
+    writeLog(list_host)
 
     if envgroup == 'work-group':
         update_host = ss.put(api_hosts + '/' + id_host, params=list_work_group, headers=HEADERS)
@@ -74,7 +83,8 @@ def updateHost(ss, envgroup, host):
     if update_host:
         if update_host.status_code == 200:
             print('Узел успешно перемещен в {}({})'.format(envgroup, update_host.status_code))
-            pprint(update_host.json())
+            writeLog('Узел успешно перемещен в {}({})'.format(envgroup, update_host.status_code))
+            writeLog(update_host.json())
         else:
             print('Узел не перемещен в {}. Не известная ошибка({})...'.format(envgroup, update_host.status_code))
     else:
@@ -91,31 +101,24 @@ def getDataMongo():
         except:
             continue
 
-# # Общение с пользователем
-# while True:
-#     try:
-#         dic = {1: 'egaisoff', 2: 'work-group'}
-#         move_host = int(input("Куда будем перемещать узлы foreman\n1)egaisoff\n2)work-group\nВведите число: "))
-#         if move_host in dic:
-#             print('Будем перемещать в {}'.format(str(dic[move_host])))
-#             break
-#         else:
-#             print('Попробуйте снова. У вас получиться!')
-#     except:
-#         print('Видимо вы ввели не число. Нужно снова идти в школу!')
-#
-#
-# # Основной код программы
-# ss = authForeman()
-# if ss.get(show_status).json()['status'] == 200:
-#     print('Доступ к API puppet получен')
-# else:
-#     print('Нет доступа к API. Выход')
-#     exit(0)
-#
-# # Передаем методу: 1) Сессию 2) В какую группу перемещаем 3) имя узла
-# resault = updateHost(ss, dic[move_host], 'cash-20000614697-200006146971')
 
+if os.path.exists('log.txt'):
+    os.remove('log.txt')
+
+# Просим пользователя выбрать куда перемещаем хосты в Foreman
+while True:
+    try:
+        dic = {1: 'egaisoff', 2: 'work-group'}
+        move_host = int(input("Куда будем перемещать узлы foreman\n1)egaisoff\n2)work-group\nВведите число: "))
+        if move_host in dic:
+            print('Будем перемещать в {}'.format(str(dic[move_host])))
+            break
+        else:
+            print('Попробуйте снова. У вас получиться!')
+    except:
+        print('Видимо вы ввели не число. Нужно снова идти в школу!')
+
+# Получаем данные с МонгоДб и общаемся с пользователем
 text = ''
 numbering_org = {}
 data_org_fsrar = getDataMongo()
@@ -123,8 +126,25 @@ for n, org in enumerate(data_org_fsrar):
     numbering_org[n] = org
     text = text + "{}) {}\n".format(n, org)
 
-print(numbering_org)
 select_org = int(input(text + "Введите число:"))
 fsrar_move = data_org_fsrar[numbering_org[select_org]]
-for i in fsrar_move:
-    print(i)
+print("Будем перемещать - {}".format(numbering_org[select_org]))
+print("\nОбщая информация:\nВыбрана организация: {}\nБудет перемещено в {}\n".format(numbering_org[select_org], dic[move_host]))
+check = int(input("Выберите следущий пункт\n1)Начать перенос\n2)Завершить программу\nВведите число:"))
+
+
+# Здесь мы создаем сессия и подлкючаемся к API Foreman
+ss = authForeman()
+if ss.get(show_status).json()['status'] == 200:
+    print('Доступ к API puppet получен')
+else:
+    print('Нет доступа к API. Выход')
+    exit(0)
+
+# Здесь мы начинаем обновлять хосты на foreman
+if check == 1:
+    for fsrar_id_host in fsrar_move:
+        # Передаем методу: 1) Сессию 2) В какую группу перемещаем 3) имя узла
+        print("Перемещаем {} в {}".format(fsrar_id_host, dic[move_host]))
+        resault = updateHost(ss, dic[move_host], fsrar_id_host)
+        sleep(3)
