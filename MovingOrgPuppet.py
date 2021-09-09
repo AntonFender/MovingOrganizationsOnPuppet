@@ -106,7 +106,6 @@ if os.path.exists('log.txt'):
     os.remove('log.txt')
 
 # Просим пользователя выбрать куда перемещаем хосты в Foreman
-
 dic = {1: 'egaisoff', 2: 'work-group'}
 move_host = int(input("Куда будем перемещать узлы foreman\n1)egaisoff\n2)work-group\nВведите число: "))
 if move_host in dic:
@@ -140,7 +139,6 @@ else:
 # Здесь мы начинаем обновлять хосты на foreman
 if check == 1:
     for fsrar_id_host in fsrar_move:
-        # Передаем методу: 1) Сессию 2) В какую группу перемещаем 3) имя узла
         print("Перемещаем {} в {}".format(fsrar_id_host, dic[move_host]))
-        resault = updateHost(ss, dic[move_host], fsrar_id_host)
+        resault = updateHost(ss, dic[move_host], fsrar_id_host)     # 1) Сессия 2) Куда перемещаем 3) Имя узла
         sleep(3)
