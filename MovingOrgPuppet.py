@@ -122,7 +122,6 @@ data_org_fsrar = getDataMongo()
 for n, org in enumerate(data_org_fsrar):
     numbering_org[n] = org
     text = text + "{}) {}\n".format(n, org)
-
 select_org = int(input(text + "Введите число:"))
 fsrar_move = data_org_fsrar[numbering_org[select_org]]
 print("Будем перемещать - {}".format(numbering_org[select_org]))

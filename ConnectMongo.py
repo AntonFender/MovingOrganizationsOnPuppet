@@ -107,11 +107,20 @@ class pymongoClass():
         """Получаем фсрар ид из эмулятора и убираем эти фсрар из списка полученого из монгоДБ"""
         list_emul_fsrar = []
         path = r'\\172.16.253.7\SysWOW64\pkcs11Emulators.ini'
+        path2 = r'\\172.16.253.13\SysWOW64\pkcs11Emulators.ini'
         config = configparser.ConfigParser()
+        config2 = configparser.ConfigParser()
         config.read(path)
+        config2.read(path2)
         for i in config:
             try:
                 FSRAR = config.get(i, 'Name')
+                list_emul_fsrar.append(FSRAR)
+            except:
+                pass
+        for i in config2:
+            try:
+                FSRAR = config2.get(i, 'Name')
                 list_emul_fsrar.append(FSRAR)
             except:
                 pass
