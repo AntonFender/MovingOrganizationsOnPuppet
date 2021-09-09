@@ -116,5 +116,15 @@ def getDataMongo():
 # # Передаем методу: 1) Сессию 2) В какую группу перемещаем 3) имя узла
 # resault = updateHost(ss, dic[move_host], 'cash-20000614697-200006146971')
 
+text = ''
+numbering_org = {}
+data_org_fsrar = getDataMongo()
+for n, org in enumerate(data_org_fsrar):
+    numbering_org[n] = org
+    text = text + "{}) {}\n".format(n, org)
 
-print(getDataMongo())
+print(numbering_org)
+select_org = int(input(text + "Введите число:"))
+fsrar_move = data_org_fsrar[numbering_org[select_org]]
+for i in fsrar_move:
+    print(i)
