@@ -91,15 +91,12 @@ class pymongoClass():
                 if i == DbrefsIdAndIP[j]:
                     glossary[j] = get_group_id_title[i]
         for fsrar in glossary:
+            fsrar_edit = 'cash-' + str(fsrar[1:]) + '-' + str(fsrar[1:]) + '1'
             org = glossary[fsrar]
             if org in resault:
-                resault[org].append(fsrar)
+                resault[org].append(fsrar_edit)
             else:
-                resault[org] = [fsrar]
+                resault[org] = [fsrar_edit]
         # for i in resault:
         #     print("{} - {}".format(i, str(len(resault[i]))))
         return resault
-
-
-
-
