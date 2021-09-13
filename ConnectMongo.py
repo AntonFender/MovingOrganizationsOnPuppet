@@ -99,8 +99,6 @@ class pymongoClass():
                 resault[org].append(fsrar_edit)
             else:
                 resault[org] = [fsrar_edit]
-        # for i in resault:
-        #     print("{} - {}".format(i, str(len(resault[i]))))
         return resault
 
     def getFsrarUmulator(self, glossary):
