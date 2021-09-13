@@ -68,17 +68,14 @@ def updateHost(ss, envgroup, host):
     update_host = ''
     id_production, id_egaisoff = environmentsGet(ss)
     id_work_group, id_work_group_no_egais = hostgroupsGet(ss)
-    list_egaisoff = {'host[hostgroup_id]': id_work_group_no_egais, 'host[environment_id]': id_egaisoff}
-    list_work_group = {'host[hostgroup_id]': id_work_group, 'host[environment_id]': id_production}
     list_host = ss.get(api_hosts + '/' + host).json()
     id_host = str(list_host['id'])
 
     if envgroup == 'work-group':
-        update_host = ss.put(api_hosts + '/' + id_host, params=list_work_group, headers=HEADERS)
-    elif envgroup == 'egaisoff':
-        update_host = ss.put(api_hosts + '/' + id_host, params=list_egaisoff, headers=HEADERS)
-    else:
-        print('Неверно указано куда перемещаем host {}({})'.format(host, envgroup))
+        update_host = ss.put(api_hosts + '/' + id_host, params={'host[hostgroup_id]': id_work_group, 'host[environment_id]': id_production}, headers=HEADERS)
+    if envgroup == 'egaisoff':
+        update_host = ss.put(api_hosts + '/' + id_host, params={'host[hostgroup_id]': id_work_group_no_egais, 'host[environment_id]': id_egaisoff}, headers=HEADERS)
+
     if update_host:
         if update_host.status_code == 200:
             writeLog(list_host)
