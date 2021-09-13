@@ -63,7 +63,6 @@ def writeLog(data):
     with open("log.txt", 'a', encoding='utf8') as f:
         f.write(str(data) + '\n')
 
-
 def updateHost(ss, envgroup, host):
     """Выполняем обновление хоста"""
     update_host = ''
@@ -121,14 +120,13 @@ if os.path.exists('log.txt'):
     os.remove('log.txt')
 
 # Просим пользователя выбрать куда перемещаем хосты в Foreman
-dic = {1: 'egaisoff', 2: 'work-group'}
+list_foreman_group = {1: 'egaisoff', 2: 'work-group'}
 move_host = int(input("Куда будем перемещать узлы foreman\n1)egaisoff\n2)work-group\nВведите число: "))
-if move_host in dic:
-    print('Будем перемещать в {}'.format(str(dic[move_host])))
-else:
+if move_host not in list_foreman_group:
     exit(0)
 
 # Получаем данные с МонгоДб и общаемся с пользователем
+foreman_group = list_foreman_group[move_host]
 text = ''
 numbering_org = {}
 data_org_fsrar, fsrar_orig_del_umul, fsrar_orig, get_title_fsrar = getDataMongo()
@@ -136,9 +134,9 @@ for n, org in enumerate(data_org_fsrar):
     count_org = str(len(data_org_fsrar[org]))
     numbering_org[n] = org
     text = text + "{}) {} - {}\n".format(n, org, count_org)
-select_org = int(input(text + "Введите число:"))
+select_org = int(input("\nВыбирите организацию:\n" + text + "Введите число:"))
 fsrar_move = data_org_fsrar[numbering_org[select_org]]
-print("\nОбщая информация:\nВыбрана организация: {}\nБудет перемещено в {}\n".format(numbering_org[select_org], dic[move_host]))
+print("\nОбщая информация:\nВыбрана организация: {}\nБудет перемещено в {}\n".format(numbering_org[select_org], foreman_group))
 
 # Формируем Excel файл
 createExcelFile(fsrar_orig_del_umul, fsrar_orig, get_title_fsrar, numbering_org[select_org])
@@ -148,18 +146,19 @@ check = int(input("Выберите следущий пункт\n1)Начать 
 
 # Здесь мы создаем сессию и подлкючаемся к API Foreman
 ss = authForeman()
-if ss.get(show_status).json()['status'] == 200:
-    print('Доступ к API puppet получен')
-else:
-    print('Нет доступа к API. Выход')
+if not ss.get(show_status).json()['status'] == 200:
+    writeLog('Нет доступа к API. Выход')
     exit(0)
+
 
 # Здесь мы начинаем обновлять хосты на foreman
 if check == 1:
     for fsrar_id_host in fsrar_move:
         try:
-            resault = updateHost(ss, dic[move_host], fsrar_id_host)     # 1) Сессия 2) Куда перемещаем 3) Имя узла
+            resault = updateHost(ss, foreman_group, fsrar_id_host)     # 1) Сессия 2) Куда перемещаем 3) Имя узла
             sleep(3)
         except:
             print('Исключение - ошибка перемещения хоста {}'.format(fsrar_id_host))
             writeLog('Исключение - ошибка перемещения хоста {}\n{}'.format(fsrar_id_host, format_exc()))
+print('Все действия закончены')
+writeLog('Все действия закончены')
