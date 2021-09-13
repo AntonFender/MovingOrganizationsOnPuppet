@@ -8,6 +8,7 @@ from sshtunnel import SSHTunnelForwarder
 import pymongo
 from bson.dbref import DBRef
 import configparser
+import copy
 
 class pymongoClass():
     def ssh_pyMongo(self):
@@ -34,18 +35,20 @@ class pymongoClass():
                 except:
                     print("Соединение не установлено!")
                 try:
+                    get_title_fsrar = self.getGroupAndOrg(conn, 'artixcs', 'shop', 'displayCode', 'title')
                     get_orgid_name = self.getGroupAndOrg(conn, 'artixcs', 'organization', '_id', 'name')
-                    DbrefsIdAndIP = self.geGroupAndFsrar(conn, 'artixcs', 'shop', 'organizationExcise', '$id', 'displayCode')
-                    fsrar_and_org = self.innerDict(get_orgid_name, DbrefsIdAndIP)
+                    id_and_fsrar_del_umul, id_and_fsrar = self.getGroupAndFsrar(conn, 'artixcs', 'shop', 'organizationExcise', '$id', 'displayCode')
+                    fsrarEdit_and_org_del_umul, fsrarOrig_and_org_del_umul  = self.innerDict(get_orgid_name, id_and_fsrar_del_umul)
+                    fsrarEdit_and_org, fsrarOrig_and_org = self.innerDict(get_orgid_name, id_and_fsrar)
                     conn.close()
-                    return fsrar_and_org
+                    return fsrarEdit_and_org_del_umul, fsrarOrig_and_org_del_umul, fsrarOrig_and_org, get_title_fsrar
                 except:
                     conn.close()
                     print("Повторите обращение к МонгоДБ")
         except:
             print("Ошибка подключения")
 
-    def geGroupAndFsrar(self, conn, bdMongo, collection, dbrefsid, id, name):
+    def getGroupAndFsrar(self, conn, bdMongo, collection, dbrefsid, id, name):
         """# 1.Коннект 2.База в монго 3.Нужная коллекция 4.DBrefs 5.Что нужно из DBrefs 6.Нужное значение в коллекции"""
         glossary = dict()       # Создаем пустой словарь
         db = conn[bdMongo]      # Выбираем базу данных в МОНГО
@@ -65,8 +68,8 @@ class pymongoClass():
             pass
         varName.close()
         # Удаляем все ФСРАР ИД, которые находятся в эмуляторе(зверинец)
-        list_del_emul = self.getFsrarUmulator(glossary)
-        return list_del_emul
+        list_del_emul = self.getFsrarUmulator(copy.deepcopy(glossary))
+        return list_del_emul, glossary
 
     def getGroupAndOrg(self, conn, bdMongo, collection, id, name):
         """Получаем ИД организации и имя организацию"""
@@ -87,7 +90,8 @@ class pymongoClass():
     def innerDict(self, get_group_id_title, DbrefsIdAndIP):
         """Объеденяем два словаря"""
         glossary = {}
-        resault = {}
+        resault_edit_fsrar = {}
+        resault_orig_fsrar = {}
         for i in get_group_id_title:
             for j in DbrefsIdAndIP:
                 if i == DbrefsIdAndIP[j]:
@@ -95,11 +99,15 @@ class pymongoClass():
         for fsrar in glossary:
             fsrar_edit = 'cash-' + str(fsrar[1:]) + '-' + str(fsrar[1:]) + '1'
             org = glossary[fsrar]
-            if org in resault:
-                resault[org].append(fsrar_edit)
+            if org in resault_edit_fsrar:
+                resault_edit_fsrar[org].append(fsrar_edit)
             else:
-                resault[org] = [fsrar_edit]
-        return resault
+                resault_edit_fsrar[org] = [fsrar_edit]
+            if org in resault_orig_fsrar:
+                resault_orig_fsrar[org].append(fsrar)
+            else:
+                resault_orig_fsrar[org] = [fsrar]
+        return resault_edit_fsrar, resault_orig_fsrar
 
     def getFsrarUmulator(self, glossary):
         """Получаем фсрар ид из эмулятора и убираем эти фсрар из списка полученого из монгоДБ"""
@@ -128,6 +136,7 @@ class pymongoClass():
             except:
                 pass
         return glossary
+
 
 # qwe = pymongoClass()
 # q = qwe.ssh_pyMongo()

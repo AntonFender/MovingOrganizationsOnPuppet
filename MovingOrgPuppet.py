@@ -8,6 +8,7 @@ from pprint import pprint
 from ConnectMongo import pymongoClass
 from time import sleep
 from traceback import format_exc
+import pandas as pd
 
 # Инициализация переменных
 show_status = "https://192.168.0.11/api/status"
@@ -97,13 +98,25 @@ def getDataMongo():
     app = pymongoClass()
     while True:
         try:
-            dict_org_host = app.ssh_pyMongo()
+            dict_org_host, fsrar_orig_del_umul, fsrar_orig, get_title_fsrar = app.ssh_pyMongo()
             if dict_org_host:
-                return dict_org_host
+                return dict_org_host, fsrar_orig_del_umul, fsrar_orig, get_title_fsrar
         except:
             continue
 
+def createExcelFile(fsrar_orig_del_umul, fsrar_orig, get_title_fsrar, org):
+    """Формируем Excel файл с выходными данными"""
+    del get_title_fsrar['All']
+    fsrar_in_umul = list(set(fsrar_orig[org]) - set(fsrar_orig_del_umul[org]))
+    fsrar_not_umul = fsrar_orig_del_umul[org]
+    list_fsrar_in_umul = [[get_title_fsrar[i], i, 'Всегда в эмуляторе'] for i in fsrar_in_umul]
+    list_fsrar_not_umul = [[get_title_fsrar[i], i, 'Перемещены в эмулятор'] for i in fsrar_not_umul]
+    frame = pd.concat([pd.DataFrame(list_fsrar_not_umul), pd.DataFrame(list_fsrar_in_umul)])
+    frame.rename(columns={0: 'ТТ', 1: 'ФСРАР', 2: 'Статус ТТ'}, inplace=True)
+    frame.to_excel('Результат.xlsx', index=False)
 
+
+# Удаляем лог файл
 if os.path.exists('log.txt'):
     os.remove('log.txt')
 
@@ -115,21 +128,23 @@ if move_host in dic:
 else:
     exit(0)
 
-
 # Получаем данные с МонгоДб и общаемся с пользователем
 text = ''
 numbering_org = {}
-data_org_fsrar = getDataMongo()
+data_org_fsrar, fsrar_orig_del_umul, fsrar_orig, get_title_fsrar = getDataMongo()
 for n, org in enumerate(data_org_fsrar):
     count_org = str(len(data_org_fsrar[org]))
     numbering_org[n] = org
     text = text + "{}) {} - {}\n".format(n, org, count_org)
 select_org = int(input(text + "Введите число:"))
 fsrar_move = data_org_fsrar[numbering_org[select_org]]
-print("Будем перемещать - {}".format(numbering_org[select_org]))
 print("\nОбщая информация:\nВыбрана организация: {}\nБудет перемещено в {}\n".format(numbering_org[select_org], dic[move_host]))
-check = int(input("Выберите следущий пункт\n1)Начать перенос\n2)Завершить программу\nВведите число:"))
 
+# Формируем Excel файл
+createExcelFile(fsrar_orig_del_umul, fsrar_orig, get_title_fsrar, numbering_org[select_org])
+
+# Общение с пользователем
+check = int(input("Выберите следущий пункт\n1)Начать перенос\n2)Завершить программу\nВведите число:"))
 
 # Здесь мы создаем сессию и подлкючаемся к API Foreman
 ss = authForeman()
@@ -148,8 +163,3 @@ if check == 1:
         except:
             print('Исключение - ошибка перемещения хоста {}'.format(fsrar_id_host))
             writeLog('Исключение - ошибка перемещения хоста {}\n{}'.format(fsrar_id_host, format_exc()))
-
-
-# Заметка. Сделать два списка. В одном списке будет список точек, которые переместила программа(фсрар и адрес)
-# Во втором списке , будут ТТ находящиеся в эмуляторе(ФСРАР и адрес).
-
