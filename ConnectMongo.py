@@ -19,7 +19,7 @@ class pymongoClass():
         ssh_host = 'cashsrv2'
         ssh_user = 'root'
         ssh_port = 22
-        ssh_password = 'Ma4u-Pik4u'
+        ssh_password = ''
 
         try:
             print("Пытаюсь установить соединение")
